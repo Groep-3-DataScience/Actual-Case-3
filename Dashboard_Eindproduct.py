@@ -24,3 +24,17 @@ weer_data.dropna(subset=['Date', 'tavg'], inplace=True)
 merged_data = pd.merge(weer_data, fiets_data, on='Date', how='inner')
 
 ###################################################################################################################################
+####################################### Scatter plot van het weer t.o.v. fietsen gehuurd die dag ##################################
+fig = px.scatter(
+    merged_data,
+    x='tavg', 
+    y='Total Rentals',
+    hover_data=['Date'],
+    labels={'tavg': 'Gemiddelde Temperatuur (°C)', 'Total Rentals': 'Aantal Fietsverhuur per Dag'},
+    title='Correlatie tussen Weer en Fietsverhuur'
+)
+st.plotly_chart(fig)
+
+###################################################################################################################################
+####################################### ________________________________________________________ ##################################
+
