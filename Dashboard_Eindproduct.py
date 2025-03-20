@@ -27,15 +27,28 @@ fiets_weer_data = pd.merge(weer_data, fiets_data, on='Date', how='inner')
 
 ###################################################################################################################################
 ####################################### Scatter plot van het weer t.o.v. fietsen gehuurd die dag ##################################
+# Bereken de regressielijn met numpy.polyfit
+x = fiets_weer_data['tavg']
+y = fiets_weer_data['Total Rentals']
+slope, intercept = np.polyfit(x, y, 1)
+
+# Genereer een reeks x-waarden voor de lijn
+x_line = np.linspace(x.min(), x.max(), 100)
+y_line = slope * x_line + intercept
+
+# Maak de scatterplot
 fig = px.scatter(
     fiets_weer_data,
     x='tavg', 
     y='Total Rentals',
-    trendline="ols",
     hover_data=['Date'],
     labels={'tavg': 'Gemiddelde Temperatuur (°C)', 'Total Rentals': 'Aantal Fietsverhuur per Dag'},
     title='Correlatie tussen Weer en Fietsverhuur'
 )
+
+# Voeg de handmatig berekende regressielijn toe
+fig.add_trace(go.Scatter(x=x_line, y=y_line, mode='lines', name='Trendline'))
+
 st.plotly_chart(fig)
 
 ###################################################################################################################################
