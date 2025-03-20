@@ -47,8 +47,8 @@ tab1, tab2, tab3 = st.tabs(["🚇 Metro Stations en Lijnen", "🚲 Fietsverhuurs
 with tab1:
     st.header("🚇 Metro Stations en Lijnen")
 
-    with st.expander("⚙️ **Metro Filteropties**", expanded=True):
-        filter_option = st.radio("**Toon data voor**", ["Weekdagen", "Weekend"])
+    with st.expander("⚙ *Metro Filteropties*", expanded=True):
+        filter_option = st.radio("*Toon data voor*", ["Weekdagen", "Weekend"])
 
         if filter_option == "Weekdagen":
             metro_data["FilteredEnEx"] = metro_data[["Weekday(Mon-Thu)Entries", "Weekday(Mon-Thu)Exits"]].sum(axis=1)
@@ -57,7 +57,7 @@ with tab1:
 
         # Select slider voor drukte
         drukte_option = st.select_slider(
-            "**Selecteer drukte**",
+            "*Selecteer drukte*",
             options=["Alle", "Rustig", "Normaal", "Druk"],
             value="Alle"
         )
@@ -71,7 +71,7 @@ with tab1:
         else:
             filtered_data = metro_data
 
-        st.write("**Kies visualisatie**")
+        st.write("*Kies visualisatie*")
         show_stations = st.checkbox("Metro stations en bezoekersaantal", value=True)
         show_tube_lines = st.checkbox("Metro lijnen", value=True)
 
@@ -159,8 +159,8 @@ with tab1:
 with tab2:
     st.header("🚲 Fietsverhuurstations")
 
-    with st.expander("⚙️ **Fiets Filteropties**", expanded=True):
-        bike_slider = st.slider("**Selecteer het minimum aantal beschikbare fietsen**", 0, 100, 0)
+    with st.expander("⚙ *Fiets Filteropties*", expanded=True):
+        bike_slider = st.slider("*Selecteer het minimum aantal beschikbare fietsen*", 0, 100, 0)
 
     df_cyclestations = pd.read_csv('cycle_stations.csv')
     df_cyclestations['installDateFormatted'] = pd.to_datetime(df_cyclestations['installDate'], unit='ms').dt.strftime('%d-%m-%Y')
@@ -188,11 +188,19 @@ with tab3:
     # Zet de 'Unnamed: 0' kolom om naar een datetime-object
     weer_data['Date'] = pd.to_datetime(weer_data['Unnamed: 0'], format='%Y-%m-%d')
 
+    # Zet de datum in de fietsdata correct
+    fiets_rentals = pd.read_csv('fietsdata2021_rentals_by_day.csv')
+    fiets_rentals["Day"] = pd.to_datetime(fiets_rentals["Day"])
+
+    # Merge de weerdata en fietsdata op datum
+    weer_data = pd.merge(weer_data, fiets_rentals[['Day', 'Total Rentals']], left_on='Date', right_on='Day', how='left')
+
     # Filter de data voor 2021
     weer_data_2021 = weer_data[weer_data['Date'].dt.year == 2021]
 
-    # Vertaling van kolomnamen naar volledige betekenis
+    # Vertaling van kolomnamen
     column_mapping = {
+        'Total Rentals': 'Aantal Verhuurde Fietsen',
         'tavg': 'Gemiddelde Temperatuur (°C)',
         'tmin': 'Minimale Temperatuur (°C)',
         'tmax': 'Maximale Temperatuur (°C)',
@@ -206,7 +214,7 @@ with tab3:
     }
 
     # Kalender om een specifieke datum te kiezen
-    datum = st.date_input("**Selecteer een datum in 2021**", min_value=pd.to_datetime("2021-01-01"), max_value=pd.to_datetime("2021-12-31"))
+    datum = st.date_input("*Selecteer een datum in 2021*", min_value=pd.to_datetime("2021-01-01"), max_value=pd.to_datetime("2021-12-31"))
 
     # Haal het weeknummer van de geselecteerde datum op
     week_nummer = datum.isocalendar()[1]
@@ -218,18 +226,23 @@ with tab3:
     # Toon de gegevens voor de geselecteerde week
     if not filtered_data_week.empty:
         st.write(f"Gegevens voor week {week_nummer} van 2021 (rondom {datum.strftime('%d-%m-%Y')}):")
+
         # Vervang kolomnamen met de vertaalde versie
         filtered_data_week = filtered_data_week.rename(columns=column_mapping)
 
         # Reset de index en voeg de aangepaste index toe die begint bij 1
         filtered_data_week_reset = filtered_data_week.reset_index(drop=True)
-        filtered_data_week_reset.index = filtered_data_week_reset.index + 1  # Start de index vanaf 1
+        filtered_data_week_reset.index = filtered_data_week_reset.index + 1  # Start index vanaf 1
 
-        # Zorg ervoor dat de juiste kolommen worden weergegeven zonder de oude index
+        # Datum formatteren
         filtered_data_week_reset['Date'] = filtered_data_week_reset['Date'].dt.strftime('%d %B %Y')
-        st.dataframe(filtered_data_week_reset[['Date', 'Gemiddelde Temperatuur (°C)', 'Minimale Temperatuur (°C)', 
-                                               'Maximale Temperatuur (°C)', 'Neerslag (mm)', 'Sneeuwval (cm)', 
-                                               'Windrichting (°)', 'Windsnelheid (m/s)', 'Windstoten (m/s)', 
-                                               'Luchtdruk (hPa)', 'Zonduur (uren)']])
+
+        # Kolommen herschikken om "Aantal Verhuurde Fietsen" direct na de datum te zetten
+        kolommen = ['Date', 'Aantal Verhuurde Fietsen', 'Gemiddelde Temperatuur (°C)', 'Minimale Temperatuur (°C)', 
+                    'Maximale Temperatuur (°C)', 'Neerslag (mm)', 'Sneeuwval (cm)', 'Windrichting (°)', 
+                    'Windsnelheid (m/s)', 'Windstoten (m/s)', 'Luchtdruk (hPa)', 'Zonduur (uren)']
+        
+        st.dataframe(filtered_data_week_reset[kolommen])
+
     else:
-        st.write(f"Geen gegevens gevonden voor week {week_nummer} van 2021.")
+        st.write(f"Geen gegevens gevonden voor week {week_nummer} van 2021.")
