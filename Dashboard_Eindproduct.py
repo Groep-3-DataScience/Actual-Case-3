@@ -3,6 +3,8 @@ import folium
 from streamlit_folium import folium_static
 import pandas as pd
 import plotly.express as px
+import geopandas as gpd
+from branca.colormap import linear
 
 fiets_data = pd.read_csv('fietsdata2021_rentals_by_day.csv')
 weer_data = pd.read_csv('weather_london.csv', index_col=0)
