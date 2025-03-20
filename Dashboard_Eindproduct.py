@@ -11,6 +11,7 @@ weer_data = pd.read_csv('weather_london.csv', index_col=0)
 metro_data = pd.read_csv('AC2021_AnnualisedEntryExit.csv', sep=';')
 metro_stations_data = pd.read_csv('London stations.csv')
 cyclestations_data = pd.read_csv('cycle_stations.csv')
+geojson_file = pd.read_csv('london_boroughs.geojson')
 
 # 1) Datumkolommen op juiste formaat
 # Fietsdata: 'Day' omzetten naar datetime en opslaan als 'Date'
