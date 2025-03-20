@@ -30,6 +30,7 @@ fig = px.scatter(
     fiets_weer_data,
     x='tavg', 
     y='Total Rentals',
+    trendline="ols",
     hover_data=['Date'],
     labels={'tavg': 'Gemiddelde Temperatuur (°C)', 'Total Rentals': 'Aantal Fietsverhuur per Dag'},
     title='Correlatie tussen Weer en Fietsverhuur'
