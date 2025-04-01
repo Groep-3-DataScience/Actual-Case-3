@@ -1,8 +1,7 @@
-folium
-streamlit
-pandas
-streamlit_folium
-plotly.express
-geopandas
-branca-colormap
-
+folium==0.19.5
+streamlit==1.44.0
+pandas==2.2.3
+streamlit_folium==0.24.0
+plotly.express==0.4.1
+geopandas==1.0.1
+branca==0.5.0
