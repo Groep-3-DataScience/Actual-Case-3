@@ -2,6 +2,5 @@ folium
 streamlit
 pandas
 streamlit_folium
-plotly.express
 geopandas
-branca.colormap
+branca
