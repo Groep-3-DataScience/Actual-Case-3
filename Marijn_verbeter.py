@@ -169,30 +169,4 @@ with tab1:
 
     folium_static(m)
 
-with tab2:
-    st.header("🚲 Fietsverhuurstations")
 
-    with st.expander("⚙ *Fiets Filteropties*", expanded=True):
-        bike_slider = st.slider("*Selecteer het minimum aantal beschikbare fietsen*", 0, 100, 0)
-
-    df_cyclestations = pd.read_csv('cycle_stations.csv')
-    df_cyclestations['installDateFormatted'] = pd.to_datetime(df_cyclestations['installDate'], unit='ms').dt.strftime('%d-%m-%Y')
-
-    m = folium.Map(location=[51.5074, -0.1278], zoom_start=12)
-    marker_cluster = MarkerCluster().add_to(m)
-
-    # Filter fietsstations data based on slider
-    filtered_stations = df_cyclestations[df_cyclestations['nbBikes'] >= bike_slider]
-
-    for index, row in filtered_stations.iterrows():
-        lat, long, station_name = row['lat'], row['long'], row['name']
-        nb_bikes, nb_standard_bikes, nb_ebikes = row['nbBikes'], row['nbStandardBikes'], row['nbEBikes']
-        install_date = row['installDateFormatted']
-
-        folium.Marker(
-            location=[lat, long],
-            popup=folium.Popup(f"Station: {station_name}<br>Aantal fietsen: {nb_bikes}<br>Standaard: {nb_standard_bikes}<br>EBikes: {nb_ebikes}<br>Installatiedatum: {install_date}", max_width=300),
-            icon=folium.Icon(color='blue', icon='info-sign')
-        ).add_to(marker_cluster)
-
-    folium_static(m)
