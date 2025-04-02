@@ -7,9 +7,19 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
-# Data inladen
+# Optimized Data Loading Function (Chunked Loading)
+@st.cache_data
+def load_data_in_chunks(files):
+    chunks = []
+    for file in files:
+        chunk_iter = pd.read_csv(file, chunksize=50000)  # Adjust chunk size based on your system memory
+        for chunk in chunk_iter:
+            chunks.append(chunk)
+    return pd.concat(chunks, ignore_index=True)
+
+# Load the required data files
 bestanden = ['2021_Q2_Central.csv', '2021_Q3_Central.csv', '2021_Q4_Central.csv']
-fiets_data_jaar = pd.concat([pd.read_csv(file) for file in bestanden], ignore_index=True)
+fiets_data_jaar = load_data_in_chunks(bestanden)
 
 weer_data = pd.read_csv('weather_london.csv')
 metro_data = pd.read_csv('AC2021_AnnualisedEntryExit.csv', sep=';')
@@ -171,17 +181,18 @@ with tab2:
     m = folium.Map(location=[51.5074, -0.1278], zoom_start=12)
     marker_cluster = MarkerCluster().add_to(m)
 
-    for index, row in df_cyclestations.iterrows():
+    # Filter fietsstations data based on slider
+    filtered_stations = df_cyclestations[df_cyclestations['nbBikes'] >= bike_slider]
+
+    for index, row in filtered_stations.iterrows():
         lat, long, station_name = row['lat'], row['long'], row['name']
         nb_bikes, nb_standard_bikes, nb_ebikes = row['nbBikes'], row['nbStandardBikes'], row['nbEBikes']
         install_date = row['installDateFormatted']
 
-        if nb_bikes >= bike_slider:
-            folium.Marker(
-                location=[lat, long],
-                popup=folium.Popup(f"Station: {station_name}<br>Aantal fietsen: {nb_bikes}<br>Standaard: {nb_standard_bikes}<br>EBikes: {nb_ebikes}<br>Installatiedatum: {install_date}", max_width=300),
-                icon=folium.Icon(color='blue', icon='info-sign')
-            ).add_to(marker_cluster)
+        folium.Marker(
+            location=[lat, long],
+            popup=folium.Popup(f"Station: {station_name}<br>Aantal fietsen: {nb_bikes}<br>Standaard: {nb_standard_bikes}<br>EBikes: {nb_ebikes}<br>Installatiedatum: {install_date}", max_width=300),
+            icon=folium.Icon(color='blue', icon='info-sign')
+        ).add_to(marker_cluster)
 
     folium_static(m)
-
